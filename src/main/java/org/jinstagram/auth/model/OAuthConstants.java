@@ -23,4 +23,6 @@ public class OAuthConstants {
 	public static final String SCOPE = "scope";
 	
 	public static final String GRANT_TYPE = "grant_type";
+	
+	public static final String SIGNATURE = "sig";
 }

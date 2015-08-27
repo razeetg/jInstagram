@@ -2,9 +2,13 @@ package org.jinstagram;
 
 import java.io.IOException;
 import java.net.Proxy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -953,16 +957,59 @@ public class Instagram {
 		throw new InstagramException("Unknown error response code: " + response.getCode() + " " + response.getBody(),
 				response.getHeaders());
 	}
+	
+	/**
+	 * Calculates the signature for the given API method and parameters. The client
+	 * secret is expected to be present in accessToken.secret. 
+	 * 
+	 * @param methodName Instagram API Method
+	 * @param params List of parameters, including client ID or access token
+	 * @return Hex encoded HMAC using SHA 256, with client secret.
+	 * @throws InstagramException
+	 * 
+	 * @see <a href="https://instagram.com/developer/secure-api-requests/">Instagram Secure API Requests</a>
+	 */
+	protected final String calculateSignature(String methodName, Map<String, String> params) throws InstagramException {
+		ArrayList<Map.Entry<String, String>> entryList = new ArrayList<Map.Entry<String, String>>(params.entrySet());
+		Collections.sort(entryList, new Comparator<Map.Entry<String, String>>() {
+			public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+				return o1.getKey().compareTo(o2.getKey());
+			}
+		});
+		
+		StringBuilder sb = new StringBuilder(methodName);
+		for(Map.Entry<String, String> entry:entryList) {
+			sb.append('|').append(entry.getKey()).append('=').append(entry.getValue());
+		}
+		
+		// Should refactor the Util, so that it doesn't imply it is only for headers
+		return EnforceSignedHeaderUtils.signature(accessToken.getSecret(), sb.toString());
+	}
 
 	/**
-	 * Get response from Instagram.
+	 * Get response from Instagram. Original code was written for Java 1.8, has been 
+	 * substantially changed to be compatible with Java 1.6, and not tested after that. 
 	 *
 	 * @param verb HTTP Verb
 	 * @param methodName Instagram API Method
 	 * @param params parameters which would be sent with the request.
 	 * @return Response object.
 	 */
+	@SuppressWarnings("unchecked")
 	protected Response getApiResponse(Verbs verb, String methodName, Map<String, String> params) throws IOException {
+		// Make no assumptions that params is a modifiable map. Also, don't modify the original map
+		params = new HashMap<String, String>(params == null ? Collections.EMPTY_MAP : params );
+		
+		if (getAccessToken() == null) {
+		    params.put(OAuthConstants.CLIENT_ID, clientId);
+		} else {
+		    params.put(OAuthConstants.ACCESS_TOKEN, getAccessToken().getToken());
+		}
+		
+		if(accessToken != null && accessToken.getSecret() != null) {
+			params.put(OAuthConstants.SIGNATURE, calculateSignature(methodName, params));
+		}
+
 		Response response;
 		String apiResourceUrl = config.getApiURL() + methodName;
 		OAuthRequest request = new OAuthRequest(verb, apiResourceUrl);
@@ -977,30 +1024,14 @@ public class Instagram {
 		if (requestProxy != null) {
 			request.setProxy(requestProxy);
 		}
-
-		// Additional parameters in url
-		if (params != null) {
+		
+		if(verb == Verbs.GET || verb == Verbs.DELETE) {
 			for (Map.Entry<String, String> entry : params.entrySet()) {
-				if (verb == Verbs.GET) {
-					request.addQuerystringParameter(entry.getKey(), entry.getValue());
-				} else {
-					request.addBodyParameter(entry.getKey(), entry.getValue());
-				}
-			}
-		}
-
-		// Add the AccessToken to the Request Url
-		if ((verb == Verbs.GET) || (verb == Verbs.DELETE)) {
-			if (accessToken == null) {
-				request.addQuerystringParameter(OAuthConstants.CLIENT_ID, clientId);
-			} else {
-				request.addQuerystringParameter(OAuthConstants.ACCESS_TOKEN, accessToken.getToken());
+				request.addQuerystringParameter(entry.getKey(), entry.getValue());
 			}
 		} else {
-			if (accessToken == null) {
-				request.addBodyParameter(OAuthConstants.CLIENT_ID, clientId);
-			} else {
-				request.addBodyParameter(OAuthConstants.ACCESS_TOKEN, accessToken.getToken());
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				request.addBodyParameter(entry.getKey(), entry.getValue());
 			}
 		}
 
