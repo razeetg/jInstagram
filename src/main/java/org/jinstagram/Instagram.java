@@ -49,6 +49,7 @@ import com.google.gson.JsonSyntaxException;
  * Instagram
  *
  * @author Sachin Handiekar
+ * @author Razee Marikar (razeetg)
  * @since 1.0
  */
 public class Instagram {

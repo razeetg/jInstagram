@@ -6,6 +6,7 @@ A java library for the Instagram API.
 
 ## <a name="toc">Table of Contents</a>
 * [Introduction](#introduction)
+* [Additional Note] (#add-note)
 * [How to Use](#how-to-use)
 * [Instagram Endpoints](#instagram-endpoints)
 * [Instagram Realtime](#instagram-realtime)
@@ -13,7 +14,6 @@ A java library for the Instagram API.
 * [Development](#development)
 * [Projects using jInstagram](#projects-using-jinstagram)
 * [License](#license)
-* [Donation](#donation)
  
 ## <a name="introduction">Introduction</a> [&#8593;](#toc)
 An unofficial Java library for the [Instagram API](http://instagram.com/developer/).
@@ -21,6 +21,9 @@ An unofficial Java library for the [Instagram API](http://instagram.com/develope
 Note : jInstagram uses code from the [scribe-java] (https://github.com/fernandezpablo85/scribe-java) library developed by [Pablo Fernandez] (https://github.com/fernandezpablo85). 
 
 
+## <a name="add-note">Additional Note</a> [&#8593;](#toc)
+I have added provision for signing requests in this version. Version number has been provisionally set to 1.1.4. However, please note that this has 
+not been sufficiently tested. Originally created an overridden class that works only with Java 8. I incorporated those changes here for others to use.
 
 ## <a name="how-to-use">How to Use</a> [&#8593;](#toc)
 
@@ -116,10 +119,3 @@ Please see the [wiki link](https://github.com/sachin-handiekar/jInstagram/wiki/P
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
 
-## <a name="donation">Donation</a> [&#8593;](#toc)
-
-jInstagram is an open-source software and free of charge. You can use jInstagram freely for any commercial and non-commercial projects.
-
-If you feel jInstagram makes your life easier, please do consider making a donation!
-
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WRFVX23N4TUQN"><img src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif" /></a>
